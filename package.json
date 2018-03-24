@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha server/**/*.test.js",
+    "test-watch":"nodemon --exec 'npm"
   },
   "author": "",
   "license": "ISC",
@@ -13,5 +14,12 @@
     "express": "^4.16.3",
     "mongodb": "^2.2.5",
     "mongoose": "^5.0.11"
+  },
+  "devDependencies": {
+    "expect": "^1.20.2",
+    "install": "^0.11.0",
+    "mocha": "^3.0.2",
+    "nodemon": "^1.10.2",
+    "supertest": "^2.0.0"
   }
 }
