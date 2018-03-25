@@ -3,14 +3,18 @@ const expect = require("expect");
 
 let {Todo} = require("./../models/todo");
 let {app} =  require("./../server");
-
-
+let todos =[{text:"suka blayat"},
+{text:"aysncio"},
+{text:"Second one"}];
 beforeEach((done) => {
-    Todo.remove({}).then(() => done());
-})
+    Todo.remove({}).then(() => {
+       Todo.insertMany(todos);
+    }).then(() => done()).catch(e => done(e));
+});
+
 describe("POST/Todos",() => {
 it("should create a new todo",(done) => {
-let text = "Test for test app";
+let text = "first one";
 request(app)
 .post("/todos")
 .send({text})
@@ -22,7 +26,7 @@ request(app)
     if(err){
       return  done(err);
     }
-    Todo.find().then((todo)=>{
+    Todo.find({text}).then((todo)=>{
     expect(todo.length).toBe(1);
     expect(todo[0].text).toBe(text);
     done();
@@ -39,10 +43,27 @@ request(app)
         return done(err);
     }
     Todo.find().then((todo)=> { //find fetch every single todo form the collection
-        expect(todo.length).toBe(0);
+        expect(todo.length).toBe(3);
         done();
     }).catch(e => done(e));
 });
 }
 );
 });
+describe("GET/Todos",()=> {
+    it("Should show us all the Todo",(done)=>{
+       request(app)
+       .get("/todos")
+       .send({Todo}) 
+       .expect(200)
+       .end((err,res)=>{
+           if(err){
+               return done(err);
+           }
+       console.log(res.body);
+    done();
+    
+       })
+       })
+
+    })
