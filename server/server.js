@@ -1,10 +1,11 @@
 let express = require("express");
 let bodyParser = require("body-parser");
+const {ObjectID} = require("mongodb");
 
 const {mongoose} = require("./db/mongoose");
 let {Todo} = require("./models/todo");
 let {User} = require("./models/users");
-
+let port = process.env.PORT || 3000;
 let app = express();
 app.use(bodyParser.json());
 app.post("/todos",(req,res)=>{
@@ -22,8 +23,22 @@ res.send({todos}); // sending back array is not good apporach rather send proper
   res.status(400).send(e);
 })
 })
-app.listen(3000,() => {
-  console.log("Running on port 3000!");
+app.get("/todos/:id",(req,res) => {
+let id = req.params.id
+if(!ObjectID.isValid(id)){
+  return res.status(404).send();
+}
+Todo.findById(id).then(todo => {
+  if(!todo){
+  res.status(404).send();
+  }
+  res.send({todo});
+}).catch((err)=> res.status(400).send(err));
+// res.send(id);
+// Todo.findById(id).then((todo)=> res.send({todo}))
+})
+app.listen(port,() => {
+  console.log(`Started up at port ${port}`);
 });
 module.exports = {
   app
