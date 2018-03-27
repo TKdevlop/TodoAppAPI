@@ -39,6 +39,19 @@ Todo.findById(id).then(todo => {
 // res.send(id);
 // Todo.findById(id).then((todo)=> res.send({todo}))
 })
+app.delete("/todos/:id",(req,res)=>{
+let id = req.params.id
+if(!ObjectID.isValid){
+  return res.status(404).send("Invalid ObjectID");
+}
+Todo.findByIdAndRemove(id).then(todo => {
+  if(!todo){
+    res.status(404).send("No Todo was found by that ID");
+  }
+  res.send(`Deleted sucessfully ${JSON.stringify(todo)}`)
+}).catch(e => res.send(e));
+})
+
 app.listen(port,() => {
   console.log(`Started up at port ${port}`);
 });
