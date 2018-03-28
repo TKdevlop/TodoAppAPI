@@ -1,6 +1,9 @@
+
+
 const mongoose = require('mongoose');
 const validator = require('validator');
 const jwt = require("jsonwebtoken");
+const _ = require("lodash");
 let UserSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -19,6 +22,7 @@ let UserSchema = new mongoose.Schema({
     minlength:6
   },
   tokens:[{
+    
     access:{
      type:String,
      required:true
@@ -28,8 +32,13 @@ let UserSchema = new mongoose.Schema({
       required:true
     }
   }]
-})
-
+},
+)
+UserSchema.methods.toJSON = function(){
+  let user = this;
+  let userObject = user.toObject()
+  return _.pick(userObject,["_id","email"]);
+}
 UserSchema.methods.generateAuthToken=function (){
 let user = this;
 let access =  "auth";
@@ -39,6 +48,25 @@ return user.save().then(() =>{
   return token;
 });
 };
+UserSchema.statics.findByToken=function(token){ //static are method which on our model 
+  //while methods work on schema intance of that object
+let User = this;
+let decoded;
+try{
+decoded = jwt.verify(token,"123abc");
+}catch(e){
+  // return new Promise((resolve,reject)=>{
+  //   reject();
+  // })
+  return Promise.reject()
+}
+console.log(decoded);
+return User.findOne({
+  "_id":decoded._id,
+  "tokens.token":token,
+  "tokens.access":"auth"
+})
+}
 
 let User = mongoose.model('User',UserSchema);
 

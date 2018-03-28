@@ -2,6 +2,8 @@ require("./config/config.js");
 const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
+
+const {authtication} = require("./middleware/authticate");
 const {
   ObjectID
 } = require('mongodb');
@@ -12,9 +14,7 @@ let {
 let {
   Todo
 } = require('./models/todo');
-let {
-  User
-} = require('./models/user');
+
 
 let app = express();
 const port = process.env.PORT || 3000;
@@ -120,15 +120,16 @@ app.patch('/todos/:id', (req, res) => {
 app.post("/users",(req,res)=>{
   let body = _.pick(req.body,["email","password"]);
 
-  let user = new User({
-    email:body.email,
-    password:body.password
-  });
+  let user = new User(body);
   user.save().then(() => {
  return user.generateAuthToken();  
   }).then(token => {
 res.header("x-auth",token).send(user);
   }).catch(e => res.send(e));
+})
+
+app.get("/users/me",authtication,(req,res)=>{
+    res.send(req.user);
 })
 app.listen(port, () => {
   console.log(`Started up at port ${port}`);
