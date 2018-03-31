@@ -1,12 +1,7 @@
-let mongoose = require('mongoose');
-
+var mongoose = require('mongoose');
+//setting up databsse and promise to golbal as mongoose 
+//don't use global promise it's uses bluebird
 mongoose.Promise = global.Promise;
-mongoose.connect(process.env.MONGODB_URI
-);
-// mongoose.connection.on('open', function() {
-//     mongoose.connection.db.admin().serverStatus(function(error, info) {
-//       console.log(info.version);
-//     });
-//   });
+mongoose.connect(process.env.MONGODB_URI);
 
 module.exports = {mongoose};
