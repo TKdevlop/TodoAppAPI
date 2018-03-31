@@ -45,8 +45,20 @@ UserSchema.methods.toJSON = function () {
 
   return _.pick(userObject, ['_id', 'email']);
 };
+UserSchema.methods.removeToken = function(token){
+let user = this;
+
+ return user.update({
+  $pull:{ //pull remove the entire property if it match the certain ceitira 
+    tokens:{
+      token
+    }
+  }
+});
+}
 
 UserSchema.methods.generateAuthToken = function () {
+
   var user = this;
   var access = 'auth';
   var token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString();
@@ -75,8 +87,30 @@ UserSchema.statics.findByToken = function (token) {
   });
 };
 
+UserSchema.statics.findByCredentials = function(email,password){
+  let User = this;
+  return User.findOne({email}).then(user =>{
+    if(!user){
+      return Promise.reject();
+    }
+   return bcrypt.compare(password,user.password).then(res => {
+      if(!res){
+          return Promise.reject()
+      }
+    //   if(!user.tokens[0]){
+    //  return  user.generateAuthToken() + "Token sucessfully Created";
+    //   }
+      else{
+        return user
+      }
+    })
+    .catch(e => res.status(400).send({}))
+  })
+  }
 UserSchema.pre('save', function (next) {
   var user = this;
+
+
 
   if (user.isModified('password')) {
     bcrypt.genSalt(10, (err, salt) => {
@@ -90,6 +124,6 @@ UserSchema.pre('save', function (next) {
   }
 });
 
-var User = mongoose.model('User', UserSchema);
+let User = mongoose.model('User', UserSchema);
 
 module.exports = {User}

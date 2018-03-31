@@ -179,7 +179,7 @@ it("SHould return user if authenticated",(done)=>{
   .set("x-auth",users[0].tokens[0].token)//we use set method in order to set header in supertest
   .expect(200) 
   .expect((res)=>{
-    console.log(res.body);
+    
     expect(res.body._id).toBe(users[0]._id.toHexString());
     expect(res.body.email).toBe(users[0].email);
   })
@@ -246,3 +246,51 @@ request(app)
 .end(done);
 })
 })
+
+describe("POST users/login",()=>{
+  it("should login user and return auth token",(done)=>{
+  
+    request(app)
+    .post("/users/login")
+    .send({email:users[1].email,password:users[1].password})
+    .expect(200)
+    .expect(res =>{
+      expect(res.header["x-auth"]).toExist();
+    })
+    .end((err,res)=>{
+      if(err){
+        return done(err);
+      }
+     User.findById(users[1]._id).then(user =>{
+    console.log(user.tokens[0])
+       expect(user.tokens[0]).toInclude({
+         access:"auth",
+         tokens:res.header["x-auth"]
+       });
+       done();
+     }).catch(e => done());
+    });
+ 
+  });
+  it("Should reject invalid ",(done)=>{
+    let email ="tushar@gmail.com";
+    let password = "userpass";
+    request(app)
+    .post("/users/login")
+    .send({email,password})
+    .expect(400)
+    .expect(res =>{
+      expect(res.header["x-auth"]).toNotExist();
+    })
+    .end((err,res)=>{
+      if(err){
+        return done(err);
+      }
+     User.findOne({email}).then(user =>{
+  if(!user){
+    done();
+  } }).catch(e => done(e));
+    });
+  
+  });
+});
