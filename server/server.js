@@ -32,8 +32,8 @@ app.use(bodyParser.json());
 app.post('/todos', authenticate, (req, res) => {
   var todo = new Todo({
     text: req.body.text,
-    // completed:req.body.completed,
-    // completedAt:req.body.completeAt,
+    completed:req.body.completed,
+    completedAt:req.body.completeAt,
     _creator: req.user._id
   });
   //after getting the data using mongoose save() method 
